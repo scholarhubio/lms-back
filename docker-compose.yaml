@@ -1,0 +1,59 @@
+version: '3.9'
+
+services:
+#_____________admin______________
+  admin:
+    build:
+      context: admin
+      dockerfile: dockerfile
+    container_name: django_admin
+    command: poetry run gunicorn config.asgi:application --config config/gunicorn_config.py
+    environment:
+      PYTHONPATH: /opt/app
+    env_file:
+      - .env
+    volumes:
+      - ./admin:/opt/app
+      - static_volume:/opt/app/static
+      - media_volume:/opt/app/media
+    depends_on:
+      content_db:
+        condition: service_started
+
+  content_db:
+    image: postgres:16.4-alpine3.20
+    container_name: content_db
+    env_file:
+      .env
+    environment:
+      - POSTGRES_PASSWORD=${CONTENT_POSTGRES_PASSWORD}
+      - POSTGRES_USER=${CONTENT_POSTGRES_USER}
+      - POSTGRES_DB=${CONTENT_POSTGRES_DB_NAME}
+      - POSTGRES_PORT=${CONTENT_POSTGRES_PORT}
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "sh -c 'pg_isready -U ${CONTENT_POSTGRES_USER} -d ${CONTENT_POSTGRES_DB_NAME}'" ]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+
+  nginx:
+    image: nginx:1.27.1-alpine-slim
+    container_name: nginx
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/django_admin.conf:/etc/nginx/conf.d/auth_api.conf:ro
+      - static_volume:/opt/app/static
+      - media_volume:/opt/app/media
+    depends_on:
+      admin:
+        condition: service_started
+    ports:
+      - "8000:8000"
+
+
+volumes:
+  static_volume:
+  media_volume:
+  pg_data:
