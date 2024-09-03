@@ -46,7 +46,7 @@ class CourseAdmin(NestedModelAdmin):
 class AnswerInline(NestedStackedInline):
     model = models.Answer
     extra = 0
-    formfield_overrides = { 
+    formfield_overrides = {
         django_models.TextField: {'widget': Textarea()} #optional, set Textarea attributes `attrs={'rows':2, 'cols':8}`
     }
 
