@@ -1,15 +1,16 @@
 import uuid
 from django.contrib.auth.models import AbstractUser
 from django.db import models
-from config.models import UUIDMixin, TimeStampMixin
+from config.models import UUIDMixin, TimeStampMixin, BaseModel
 from django.dispatch import receiver
 from django.db.models.signals import post_save
 from phonenumber_field.modelfields import PhoneNumberField
 from django.contrib.auth.validators import UnicodeUsernameValidator
 from django.utils.translation import gettext_lazy as _
+from datetime import datetime, timezone
 
 
-class User(AbstractUser, UUIDMixin, TimeStampMixin):
+class User(AbstractUser, BaseModel):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     phone_number = PhoneNumberField(blank=False, unique=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -41,7 +42,7 @@ class User(AbstractUser, UUIDMixin, TimeStampMixin):
         return True
 
 
-class Profile(UUIDMixin, TimeStampMixin):
+class Profile(BaseModel):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     bio = models.TextField(max_length=500, blank=True)
     location = models.CharField(max_length=30, blank=True)
@@ -50,6 +51,23 @@ class Profile(UUIDMixin, TimeStampMixin):
 
     def __str__(self):
         return f'{self.user.username} Profile'
+
+
+class Student(BaseModel):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return self.user.username
+
+    def has_debt(self):
+        """Check if the student has any unpaid subscriptions."""
+        unpaid_subscriptions = self.subscription_set.filter(end_date__lt=datetime.now(timezone.utc), is_active=True)
+        return unpaid_subscriptions.exists()
+
+    def get_active_courses(self):
+        """Get all courses the student currently has access to."""
+        active_subscriptions = self.subscription_set.filter(end_date__gte=datetime.now(timezone.utc), is_active=True)
+        return [subscription.course for subscription in active_subscriptions]
 
 
 # Signal to automatically create or update the profile when the User object is saved

@@ -1,5 +1,3 @@
-version: '3.9'
-
 services:
 #_____________admin______________
   admin:
@@ -13,9 +11,9 @@ services:
     env_file:
       - .env
     volumes:
-      - ./admin:/opt/app
-      - static_volume:/opt/app/static
-      - media_volume:/opt/app/media
+      - ./admin:/opt/app:rw
+      - static_volume:/opt/app/static:rw
+      - media_volume:/opt/app/media:rw
     depends_on:
       content_db:
         condition: service_started
@@ -44,8 +42,8 @@ services:
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
       - ./nginx/django_admin.conf:/etc/nginx/conf.d/auth_api.conf:ro
-      - static_volume:/opt/app/static
-      - media_volume:/opt/app/media
+      - static_volume:/opt/app/static:ro
+      - media_volume:/opt/app/media:ro
     depends_on:
       admin:
         condition: service_started
