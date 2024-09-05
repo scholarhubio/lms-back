@@ -1,13 +1,12 @@
 import uuid
 from django.contrib.auth.models import AbstractUser
 from django.db import models
-from config.models import UUIDMixin, TimeStampMixin, BaseModel
+from config.models import BaseModel
 from django.dispatch import receiver
 from django.db.models.signals import post_save
 from phonenumber_field.modelfields import PhoneNumberField
 from django.contrib.auth.validators import UnicodeUsernameValidator
 from django.utils.translation import gettext_lazy as _
-from datetime import datetime, timezone
 
 
 class User(AbstractUser, BaseModel):
@@ -58,16 +57,6 @@ class Student(BaseModel):
 
     def __str__(self):
         return self.user.username
-
-    def has_debt(self):
-        """Check if the student has any unpaid subscriptions."""
-        unpaid_subscriptions = self.subscription_set.filter(end_date__lt=datetime.now(timezone.utc), is_active=True)
-        return unpaid_subscriptions.exists()
-
-    def get_active_courses(self):
-        """Get all courses the student currently has access to."""
-        active_subscriptions = self.subscription_set.filter(end_date__gte=datetime.now(timezone.utc), is_active=True)
-        return [subscription.course for subscription in active_subscriptions]
 
 
 # Signal to automatically create or update the profile when the User object is saved
