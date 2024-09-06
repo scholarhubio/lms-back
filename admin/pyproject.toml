@@ -18,6 +18,7 @@ pillow = "^10.4.0"
 django-phonenumber-field = {version = "^8.0.0", extras = ["phonenumbers"]}
 django-nested-admin = "^4.1.1"
 django-tinymce = "^4.1.0"
+django-ckeditor = "^6.7.1"
 
 [tool.poetry.group.dev.dependencies]
 flake8 = "^7.0.0"
@@ -38,3 +39,4 @@ faker = "^22.5.1"
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+

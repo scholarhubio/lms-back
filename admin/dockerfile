@@ -19,13 +19,7 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     GUNICORN_LOGLEVEL='error'
 
 # Создание no-root пользователя
-RUN groupadd -r $APP_USER && \
-    useradd -d $SRC_DIR -r -g $APP_USER $APP_USER && \
-    chown $APP_USER:$APP_USER -R $SRC_DIR && \
-    mkdir $LOGS_DIR && \
-    chown $APP_USER:$APP_USER -R $SRC_DIR
-
-USER $APP_USER
+RUN mkdir $LOGS_DIR
 
 # Установка зависимостей
 WORKDIR $APP_DIR
@@ -33,14 +27,15 @@ WORKDIR $APP_DIR
 ENV DJANGO_SETTINGS_MODULE 'config.settings'
 ENV PATH="/$SRC_DIR/.local/bin:${PATH}"
 
-RUN pip install --user --upgrade pip && \
-    pip install --user --no-cache-dir poetry
+RUN pip install --upgrade pip && \
+    pip install --no-cache-dir poetry
 
 COPY pyproject.toml pyproject.toml
 #COPY src/requrements.txt requrements.txt
 
-RUN poetry install --no-root --with test
+RUN poetry install --with test
 
 # Копирования кода приложения
 COPY ./ $APP_DIR
+
 COPY /entrypoint.sh /usr/local/bin/entrypoint.sh

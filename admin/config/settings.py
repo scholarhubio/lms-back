@@ -11,4 +11,5 @@ include(
     'components/templates.py',
     'components/apps.py',
     'components/other.py',
+    'components/ckeditor.py',
 )
