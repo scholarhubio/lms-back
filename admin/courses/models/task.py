@@ -1,7 +1,7 @@
 from django.db import models
 from config.models import ContentBaseModel, OrderedModel, BaseModel
 from courses.choices import TaskType, ItemType
-
+from ckeditor.fields import RichTextField
 
 class Task(ContentBaseModel, OrderedModel):
     parent = models.ForeignKey('self',
@@ -21,6 +21,6 @@ class TaskItem(BaseModel):
 
 class Answer(BaseModel):
     task = models.ForeignKey('courses.Task', on_delete=models.CASCADE)
-    text = models.TextField()
+    text = RichTextField()
     is_correct = models.BooleanField(default=False)
     manual = models.BooleanField(default=False)

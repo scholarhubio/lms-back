@@ -12,4 +12,6 @@ INSTALLED_APPS = [
     'courses.apps.CoursesConfig',
     'payments.apps.PaymentsConfig',
     'nested_admin',
+    'ckeditor',
+    'ckeditor_uploader',
 ]
