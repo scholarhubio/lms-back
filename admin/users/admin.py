@@ -2,6 +2,7 @@ from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from users.models import Profile, User
 from django.utils.translation import gettext_lazy as _
+from django.contrib.auth.models import Permission
 
 
 class UserProfileInline(admin.StackedInline):
@@ -12,12 +13,12 @@ class UserProfileInline(admin.StackedInline):
 
 class CustomizedUserAdmin(UserAdmin):
     fieldsets = (
-        (None, {'fields': ('username', 'password',)}),
+        (None, {'fields': ('username', 'password')}),
         (_('Personal info'), {'fields': ('first_name', 'last_name', 'email', 'phone_number')}),
         (_('Permissions'), {
             'fields': (
                 'is_active', 'is_staff', 'is_superuser',
-                'user_permissions',),
+                'user_permissions', 'groups',),
         }),
         (_('Important dates'), {'fields': ('last_login', 'date_joined')}),
     )

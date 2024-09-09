@@ -1,7 +1,7 @@
 from .factories import SubscriptionFactory, AccessPeriodFactory, TransactionFactory
 from .strategies import FullCoursePaymentStrategy, IncrementalPaymentStrategy
 from .utils.payment_calculator import PaymentCalculator
-from ..models import Payment, Subscription
+from payments.models import Payment, Subscription
 
 
 class PaymentService:

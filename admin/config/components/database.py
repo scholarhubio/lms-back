@@ -3,7 +3,7 @@ import os
 DATABASES = {
     'default': {
         'ENGINE': "django.db.backends.postgresql",
-        'NAME': os.environ.get('CONTENT_POSTGRES_NAME'),
+        'NAME': os.environ.get('CONTENT_POSTGRES_DB_NAME'),
         'USER': os.environ.get('CONTENT_POSTGRES_USER'),
         'PASSWORD': os.environ.get('CONTENT_POSTGRES_PASSWORD'),
         'HOST': os.environ.get('CONTENT_POSTGRES_HOST'),

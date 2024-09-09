@@ -2,7 +2,7 @@ from datetime import datetime, timedelta
 from dateutil.relativedelta import relativedelta
 from django.utils import timezone
 from payments.models import AccessPeriod, Subscription, Course
-from users.models import Student
+from users.models import User
 
 class FullCourseAccessManager:
     """Manager for handling full course access."""
@@ -110,7 +110,7 @@ class AccessPeriodManager:
 
     def create_access_period(
         self,
-        student: Student,
+        student: User,
         course: Course,
         start_date: datetime,
         end_date: datetime

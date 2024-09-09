@@ -7,6 +7,7 @@ from django.db.models.signals import post_save
 from phonenumber_field.modelfields import PhoneNumberField
 from django.contrib.auth.validators import UnicodeUsernameValidator
 from django.utils.translation import gettext_lazy as _
+from users.choices import RoleType
 
 
 class User(AbstractUser, BaseModel):
@@ -14,9 +15,9 @@ class User(AbstractUser, BaseModel):
     phone_number = PhoneNumberField(blank=False, unique=True)
     created_at = models.DateTimeField(auto_now_add=True)
     modified_at = models.DateTimeField(auto_now=True)
-
+    role = models.CharField(choices=RoleType.choices, max_length=20)
+    date_joined = models.DateTimeField(null=True)
     username_validator = UnicodeUsernameValidator()
-
     username = models.CharField(
         _('username'),
         max_length=150,
@@ -26,7 +27,11 @@ class User(AbstractUser, BaseModel):
         error_messages={
             'unique': _("A user with that username already exists."),
         },
+        null=True
     )
+    email = models.EmailField(null=True)
+    first_name = models.CharField(max_length=150, null=True)
+    last_name = models.CharField(max_length=150, null=True)
     EMAIL_FIELD = 'email'
     USERNAME_FIELD = 'phone_number'
     REQUIRED_FIELDS = ['username']
@@ -42,7 +47,7 @@ class User(AbstractUser, BaseModel):
 
 
 class Profile(BaseModel):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
     bio = models.TextField(max_length=500, blank=True)
     location = models.CharField(max_length=30, blank=True)
     birth_date = models.DateField(null=True, blank=True)
@@ -50,13 +55,6 @@ class Profile(BaseModel):
 
     def __str__(self):
         return f'{self.user.username} Profile'
-
-
-class Student(BaseModel):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
-
-    def __str__(self):
-        return self.user.username
 
 
 # Signal to automatically create or update the profile when the User object is saved
