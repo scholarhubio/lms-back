@@ -9,6 +9,7 @@ class Module(ContentBaseModel):
 
 class Unit(ContentBaseModel):
     module = models.ForeignKey('courses.Module', on_delete=models.CASCADE)
+    description = models.TextField()
     type = models.CharField(choices=UnitType.choices, default=UnitType.paid.value)
 
 

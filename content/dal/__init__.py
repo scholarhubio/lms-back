@@ -1,0 +1,1 @@
+"""Interfaces for Data Access Layer."""
