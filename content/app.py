@@ -11,6 +11,7 @@ from db.redis import get_redis
 from exceptions import TokenDenied
 from core.logger import LOGGING
 from logging import config as logging_config
+from middlewares.main import setup_middleware
 
 logging_config.dictConfig(LOGGING)
 
@@ -25,7 +26,7 @@ def create_app() -> FastAPI:
         lifespan=setup_lifespan
     )
     setup_handlers(app)
-    #setup_middleware(app)
+    setup_middleware(app)
     setup_routers(app)
     add_pagination(app)
     return app
