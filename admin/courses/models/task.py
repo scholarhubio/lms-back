@@ -3,6 +3,7 @@ from config.models import ContentBaseModel, OrderedModel, BaseModel
 from courses.choices import TaskType, ItemType
 from ckeditor.fields import RichTextField
 
+
 class Task(ContentBaseModel, OrderedModel):
     parent = models.ForeignKey('self',
                                on_delete=models.CASCADE,
@@ -10,7 +11,12 @@ class Task(ContentBaseModel, OrderedModel):
                                blank=True, null=True, default=None,
                                related_name='children')
     unit = models.ForeignKey('courses.Unit', on_delete=models.CASCADE)
-    type = models.CharField(max_length=25, choices=TaskType.choices)
+    text = RichTextField()
+    type = models.CharField(max_length=25, choices=TaskType.choices, default=TaskType.single_choice)
+    order = models.PositiveIntegerField(blank=True)
+
+    class Meta:
+        unique_together = ['unit', 'parent', 'order']
 
 
 class TaskItem(BaseModel):
@@ -20,6 +26,7 @@ class TaskItem(BaseModel):
 
 
 class Answer(BaseModel):
+    sign = models.CharField(max_length=10)
     task = models.ForeignKey('courses.Task', on_delete=models.CASCADE)
     text = RichTextField()
     is_correct = models.BooleanField(default=False)

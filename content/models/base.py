@@ -1,18 +1,19 @@
-from sqlalchemy import String, DateTime, Integer, func, Boolean
+from sqlalchemy import String, DateTime, Integer, func
 from sqlalchemy.orm import declared_attr, DeclarativeBase, Mapped, mapped_column
 from sqlalchemy.ext.asyncio import AsyncAttrs
 from sqlalchemy.future import select
 from sqlalchemy.orm import Session
 import uuid
-from slugify import slugify
 from datetime import datetime
-from typing import Any, Dict, Optional
+from typing import Any, Dict
+from models.managers import SoftDeleteQuery
 
 
 class Base(AsyncAttrs, DeclarativeBase):
     """Base class with AsyncAttrs for async SQLAlchemy models."""
 
-    __abstract__ = True  # Mark as abstract
+    __abstract__ = True
+    query_class = SoftDeleteQuery
 
     id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
     is_deleted: Mapped[bool] = mapped_column(default=False)
@@ -37,19 +38,11 @@ class BaseModel(Base, TimeStampMixin):
 
 
 class ContentBaseModel(BaseModel):
-    """Content model with title and slug fields."""
+    """Content model with title and fields."""
 
     __abstract__ = True
 
     title: Mapped[str] = mapped_column(String(255), nullable=False)
-    slug: Mapped[Optional[str]] = mapped_column(String(255), unique=True)
-
-    async def save(self, session: Session) -> None:
-        """Save instance asynchronously and generate slug if not set."""
-        if not self.slug:
-            self.slug = slugify(self.title)
-        session.add(self)
-        await session.commit()
 
     def __str__(self) -> str:
         return self.title

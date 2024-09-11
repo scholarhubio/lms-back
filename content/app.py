@@ -28,7 +28,6 @@ def create_app() -> FastAPI:
     add_pagination(app)
     return app
 
-
 app = create_app()
 
 @AuthJWT.load_config

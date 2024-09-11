@@ -44,3 +44,15 @@ TokenDenied = HTTPException(
     detail="Token has been revoked or denied",
     headers={"WWW-Authenticate": "Bearer"},
 )
+
+
+AlreadyChoosen = HTTPException(
+    status_code=status.HTTP_409_CONFLICT,
+    detail="The answer was already choosen",
+)
+
+
+TaskAnswered = HTTPException(
+    status_code=status.HTTP_409_CONFLICT,
+    detail="The task was already answered",
+)
