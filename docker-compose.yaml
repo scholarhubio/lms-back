@@ -14,6 +14,7 @@ services:
       - ./admin:/opt/app:rw
       - static_volume:/opt/app/static:rw
       - media_volume:/opt/app/media:rw
+      - ./logs/admin:/opt/app/logs:rw
     depends_on:
       content_db:
         condition: service_started
@@ -27,7 +28,7 @@ services:
       context: content
       dockerfile: dockerfile
     container_name: content_api
-    command: poetry run uvicorn app:app --port 8080 --reload --host 0.0.0.0 --workers 4
+    command: poetry run gunicorn app:app --worker-class uvicorn.workers.UvicornWorker --workers 4 --bind 0.0.0.0:8080
     environment:
       PYTHONPATH: /opt/app
     ports:
@@ -36,6 +37,7 @@ services:
       - .env
     volumes:
       - ./content:/opt/app:rw
+      - ./logs/api:/opt/app/logs:rw
     depends_on:
       content_db:
         condition: service_started
@@ -56,6 +58,7 @@ services:
       - POSTGRES_PORT=${CONTENT_POSTGRES_PORT}
     volumes:
       - pg_data:/var/lib/postgresql/data:rw
+      - ./logs:/var/log/postgresql:rw
     healthcheck:
       test: [ "CMD-SHELL", "sh -c 'pg_isready -U ${CONTENT_POSTGRES_USER} -d ${CONTENT_POSTGRES_DB_NAME}'" ]
       interval: 10s
@@ -86,6 +89,7 @@ services:
       - ./nginx/content_api_lb.conf:/etc/nginx/conf.d/content_api_lb.conf:ro
       - static_volume:/opt/app/static:ro
       - media_volume:/opt/app/media:ro
+      - ./logs/nginx:/var/log/nginx:rw
     depends_on:
       admin:
         condition: service_started

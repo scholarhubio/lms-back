@@ -1,17 +1,14 @@
-LOG_FORMAT = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-LOG_DEFAULT_HANDLERS = ['console', ]
+import os
 
-# В логгере настраивается логгирование uvicorn-сервера.
-# Про логирование в Python можно прочитать в документации
-# https://docs.python.org/3/howto/logging.html
-# https://docs.python.org/3/howto/logging-cookbook.html
+LOG_DIR = os.getenv("LOG_DIR", "/opt/app/logs")
+os.makedirs(LOG_DIR, exist_ok=True)
 
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
     'formatters': {
         'verbose': {
-            'format': LOG_FORMAT
+            'format': '%(asctime)s - %(name)s - %(levelname)s - %(message)s',
         },
         'default': {
             '()': 'uvicorn.logging.DefaultFormatter',
@@ -29,34 +26,60 @@ LOGGING = {
             'class': 'logging.StreamHandler',
             'formatter': 'verbose',
         },
-        'default': {
-            'formatter': 'default',
-            'class': 'logging.StreamHandler',
-            'stream': 'ext://sys.stdout',
+        'info_file': {
+            'level': 'INFO',
+            'class': 'logging.FileHandler',
+            'filename': os.path.join(LOG_DIR, 'info.log'),
+            'formatter': 'verbose',
         },
-        'access': {
-            'formatter': 'access',
-            'class': 'logging.StreamHandler',
-            'stream': 'ext://sys.stdout',
+        'error_file': {
+            'level': 'ERROR',
+            'class': 'logging.FileHandler',
+            'filename': os.path.join(LOG_DIR, 'error.log'),
+            'formatter': 'verbose',
+        },
+        'stdout': {
+            'level': 'INFO',
+            'class': 'logging.FileHandler',
+            'filename': os.path.join(LOG_DIR, 'stdout.log'),
+            'formatter': 'verbose',
+        },
+        'stderr': {
+            'level': 'ERROR',
+            'class': 'logging.FileHandler',
+            'filename': os.path.join(LOG_DIR, 'stderr.log'),
+            'formatter': 'verbose',
         },
     },
     'loggers': {
-        '': {
-            'handlers': LOG_DEFAULT_HANDLERS,
+        'my_app': {
+            'handlers': ['info_file', 'error_file'],
             'level': 'INFO',
+            'propagate': True,
+        },
+        'stdout': {
+            'handlers': ['stdout'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+        'stderr': {
+            'handlers': ['stderr'],
+            'level': 'ERROR',
+            'propagate': False,
         },
         'uvicorn.error': {
-            'level': 'INFO',
+            'handlers': ['error_file'],
+            'level': 'ERROR',
+            'propagate': False,
         },
         'uvicorn.access': {
-            'handlers': ['access'],
+            'handlers': ['info_file'],
             'level': 'INFO',
             'propagate': False,
         },
     },
     'root': {
         'level': 'INFO',
-        'formatter': 'verbose',
-        'handlers': LOG_DEFAULT_HANDLERS,
+        'handlers': ['console', 'info_file', 'error_file'],
     },
 }
