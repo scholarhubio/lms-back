@@ -5,9 +5,10 @@ services:
       context: admin
       dockerfile: dockerfile
     container_name: django_admin
-    command: poetry run python3 manage.py runserver 0.0.0.0:8000 #gunicorn config.asgi:application --config config/gunicorn_config.py
+    command: poetry run gunicorn config.asgi:application --config config/gunicorn_config.py #python3 manage.py runserver 0.0.0.0:8000 #
     environment:
       PYTHONPATH: /opt/app
+      TZ: UTC
     env_file:
       - .env
     volumes:
@@ -22,6 +23,10 @@ services:
         condition: service_started
     networks:
       - app-network
+    profiles:
+      - production
+      - debug
+    restart: no
 
   content_api:
     build:
@@ -31,6 +36,7 @@ services:
     command: poetry run gunicorn app:app --worker-class uvicorn.workers.UvicornWorker --workers 4 --bind 0.0.0.0:8080
     environment:
       PYTHONPATH: /opt/app
+      TZ: UTC
     ports:
       - 8001:8080
     env_file:
@@ -45,6 +51,10 @@ services:
         condition: service_started
     networks:
       - app-network
+    profiles:
+      - production
+      - debug
+    restart: no
 
   content_db:
     image: postgres:16.4-alpine3.20
@@ -56,6 +66,7 @@ services:
       - POSTGRES_USER=${CONTENT_POSTGRES_USER}
       - POSTGRES_DB=${CONTENT_POSTGRES_DB_NAME}
       - POSTGRES_PORT=${CONTENT_POSTGRES_PORT}
+      - TZ=UTC
     volumes:
       - pg_data:/var/lib/postgresql/data:rw
       - ./logs:/var/log/postgresql:rw
@@ -66,19 +77,57 @@ services:
       retries: 3
     networks:
       - app-network
+    profiles:
+      - debug
+      - production
+    restart: no
+
+  pgbackups:
+    image: prodrigestivill/postgres-backup-local
+    user: postgres:postgres # Optional: see below
+    volumes:
+        - ./backups:/backups
+    links:
+        - content_db
+    depends_on:
+        - content_db
+    environment:
+        - POSTGRES_HOST=content_db
+        - POSTGRES_DB=${CONTENT_POSTGRES_DB_NAME}
+        - POSTGRES_USER=${CONTENT_POSTGRES_USER}
+        - POSTGRES_PASSWORD=${CONTENT_POSTGRES_PASSWORD}
+        - POSTGRES_EXTRA_OPTS=-Z1 --schema=public --blobs
+        - SCHEDULE=@daily
+        - BACKUP_ON_START=TRUE
+        - BACKUP_KEEP_DAYS=7
+        - BACKUP_KEEP_WEEKS=4
+        - BACKUP_KEEP_MONTHS=6
+        - HEALTHCHECK_PORT=8080
+        - TZ=UTC
+    networks:
+      - app-network
+    profiles:
+      - debug
+      - production
+    restart: no
 
   redis:
     image: redis:7.2.3-alpine3.18
     container_name: redis
-    restart: on-failure
     env_file:
       - .env
+    environment:
+      TZ: UTC
     volumes:
       - redis_data:/data:rw
     ports:
       - "${REDIS_PORT}:${REDIS_PORT}"
     networks:
       - app-network
+    profiles:
+      - debug
+      - production
+    restart: no
 
   nginx:
     image: nginx:1.27.1-alpine-slim
@@ -90,6 +139,8 @@ services:
       - static_volume:/opt/app/static:ro
       - media_volume:/opt/app/media:ro
       - ./logs/nginx:/var/log/nginx:rw
+    environment:
+      TZ: UTC
     depends_on:
       admin:
         condition: service_started
@@ -100,6 +151,10 @@ services:
       - "8080:8080"
     networks:
       - app-network
+    profiles:
+      - debug
+      - production
+    restart: no
 
   content_api_lb:
     image: nginx:1.27.1-alpine-slim
@@ -111,6 +166,12 @@ services:
       - content_api
     networks:
       - app-network
+    environment:
+      TZ: UTC
+    profiles:
+      - debug
+      - production
+    restart: no
 
   admin_lb:
     image: nginx:1.27.1-alpine-slim
@@ -120,8 +181,14 @@ services:
       - ./load_balancers/django_admin.conf:/etc/nginx/conf.d/django_admin.conf:ro
     depends_on:
       - admin
+    environment:
+      TZ: UTC
     networks:
       - app-network
+    profiles:
+      - debug
+      - production
+    restart: no
 
 volumes:
   static_volume:
@@ -132,3 +199,9 @@ volumes:
 networks:
   app-network:
     driver: bridge
+
+x-restart-debug:
+  restart: "no"
+
+x-restart-production:
+  restart: always
