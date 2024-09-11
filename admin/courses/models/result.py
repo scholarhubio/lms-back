@@ -1,10 +1,9 @@
 from django.db import models
 from config.models import BaseModel, BaseContentSessionModel
-from courses.choices import TaskCompletionType, TaskResultType
 
 
 class UserAnswer(BaseModel):
-    user_id = models.UUIDField(unique=True)
+    user_id = models.UUIDField()
     session = models.ForeignKey('courses.UserTaskSession', on_delete=models.SET_NULL, null=True)
     answer = models.OneToOneField('courses.Answer', on_delete=models.SET_NULL, null=True)
     answer_text = models.TextField()
@@ -13,7 +12,9 @@ class UserAnswer(BaseModel):
 
 class UserTaskSession(BaseContentSessionModel):
     task = models.ForeignKey('courses.Task', on_delete=models.SET_NULL, null=True)
-    tries = models.PositiveSmallIntegerField(default=0)
+
+    def __str__(self) -> str:
+        return str(self.id)
 
 
 class UserUnitSession(BaseContentSessionModel):

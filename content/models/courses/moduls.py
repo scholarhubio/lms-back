@@ -3,6 +3,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from typing import Optional
 from models import ContentBaseModel, Course, OrderedModel, Task
 from models.courses.choices import UnitType
+from models.courses.result import UserModuleSession
 from uuid import UUID
 
 
@@ -12,13 +13,14 @@ class Module(ContentBaseModel):
     module_courses: Mapped[list['CourseModule']] = relationship(
         'CourseModule', back_populates='module', cascade='all, delete-orphan'
     )
+    sessions: Mapped[list['UserModuleSession']] = relationship('UserModuleSession', back_populates='module')
     units: Mapped[list['Unit']] = relationship('Unit', back_populates='module', cascade='all, delete-orphan')
 
     def __str__(self) -> str:
         return self.title
 
 
-class Unit(ContentBaseModel):
+class Unit(ContentBaseModel, OrderedModel):
     __tablename__ = 'courses_unit'
 
     module_id: Mapped[UUID] = mapped_column(ForeignKey('courses_module.id'), nullable=False)
@@ -45,7 +47,7 @@ class UnitItem(ContentBaseModel):
 
 
 class CourseModule(ContentBaseModel, OrderedModel):
-    __tablename__ = 'course_coursemodule'
+    __tablename__ = 'courses_coursemodule'
 
     course_id: Mapped[UUID] = mapped_column(ForeignKey('courses_course.id'), nullable=False)
     module_id: Mapped[UUID] = mapped_column(ForeignKey('courses_module.id'), nullable=False)  # Assuming the 'modules' table exists
