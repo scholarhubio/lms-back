@@ -13,7 +13,7 @@ services:
       - .env
     volumes:
       - ./admin:/opt/app:rw
-      - static_volume:/opt/app/static:rw
+      - ./admin/static:/opt/app/static:rw
       - media_volume:/opt/app/media:rw
       - ./logs/admin:/opt/app/logs:rw
     depends_on:
