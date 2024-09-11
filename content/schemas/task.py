@@ -16,9 +16,9 @@ class AnswerSchema(BaseSchema):
 class TaskSchema(BaseSchema):
     title: str
     complition: str | None = None
-    stars: int = None
-    type: str
-    order: int
+    stars: int | None = None
+    type: str | None = None
+    order: int | None = None
 
 
 class TaskWithAnswersSchema(TaskSchema):

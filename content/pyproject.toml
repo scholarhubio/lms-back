@@ -15,7 +15,7 @@ pydantic-core = "^2.22.0"
 python-dotenv = "^1.0.0"
 SQLAlchemy = "^2.0.31"
 uvicorn = "^0.30.5"
-async-fastapi-jwt-auth = "^0.6.6"
+async-fastapi-jwt-auth = {version = "^0.6.6", extras = ["asymmetric"]}
 gunicorn = "^22.0.0"
 redis = "^5.0.8"
 passlib = "^1.7.4"
