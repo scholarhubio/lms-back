@@ -37,7 +37,6 @@ services:
     environment:
       PYTHONPATH: /opt/app
       TZ: UTC
-      LOG_DIR: /opt/app/logs
     ports:
       - 8001:8080
     env_file:
