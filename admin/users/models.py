@@ -1,22 +1,23 @@
 import uuid
 from django.contrib.auth.models import AbstractUser
 from django.db import models
-from config.models import UUIDMixin, TimeStampMixin
+from config.models import BaseModel
 from django.dispatch import receiver
 from django.db.models.signals import post_save
 from phonenumber_field.modelfields import PhoneNumberField
 from django.contrib.auth.validators import UnicodeUsernameValidator
 from django.utils.translation import gettext_lazy as _
+from users.choices import RoleType
 
 
-class User(AbstractUser, UUIDMixin, TimeStampMixin):
+class User(AbstractUser, BaseModel):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     phone_number = PhoneNumberField(blank=False, unique=True)
     created_at = models.DateTimeField(auto_now_add=True)
     modified_at = models.DateTimeField(auto_now=True)
-
+    role = models.CharField(choices=RoleType.choices, max_length=20)
+    date_joined = models.DateTimeField(null=True)
     username_validator = UnicodeUsernameValidator()
-
     username = models.CharField(
         _('username'),
         max_length=150,
@@ -26,7 +27,11 @@ class User(AbstractUser, UUIDMixin, TimeStampMixin):
         error_messages={
             'unique': _("A user with that username already exists."),
         },
+        null=True
     )
+    email = models.EmailField(null=True)
+    first_name = models.CharField(max_length=150, null=True)
+    last_name = models.CharField(max_length=150, null=True)
     EMAIL_FIELD = 'email'
     USERNAME_FIELD = 'phone_number'
     REQUIRED_FIELDS = ['username']
@@ -34,15 +39,9 @@ class User(AbstractUser, UUIDMixin, TimeStampMixin):
     def __str__(self):
         return f'{self.email} {self.id}'
 
-    def has_perm(self, perm, obj=None):
-        return True
 
-    def has_module_perms(self, app_label):
-        return True
-
-
-class Profile(UUIDMixin, TimeStampMixin):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
+class Profile(BaseModel):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
     bio = models.TextField(max_length=500, blank=True)
     location = models.CharField(max_length=30, blank=True)
     birth_date = models.DateField(null=True, blank=True)

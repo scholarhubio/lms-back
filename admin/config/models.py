@@ -1,11 +1,12 @@
 from django.db import models
-import uuid
-from django.utils.text import slugify
 from courses.choices import TaskCompletionType, TaskResultType
+import uuid
+from config.managers import ActiveManager, SoftDeleteManager
 
 
 class UUIDMixin(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    is_deleted = models.BooleanField(default=False)
 
     class Meta:
         abstract = True
@@ -23,8 +24,17 @@ class BaseModel(UUIDMixin, TimeStampMixin):
     class Meta:
         abstract = True
 
+    objects = SoftDeleteManager()  # Default manager
+    active_objects = ActiveManager()  # Custom manager to filter out deleted objects
+
+    def delete(self, using=None, keep_parents=False):
+        """Soft delete the object by setting `is_deleted` to True."""
+        self.is_deleted = True
+        self.save()
+
 
 class ContentBaseModel(UUIDMixin, TimeStampMixin):
+<<<<<<< HEAD
     title = models.CharField(max_length=255, verbose_name="Заголовок модуля")
     slug = models.SlugField(max_length=255, unique=True, blank=True, verbose_name="Ссылка")
 
@@ -32,6 +42,9 @@ class ContentBaseModel(UUIDMixin, TimeStampMixin):
         if not self.slug:
             self.slug = slugify(self.title)
         super().save(*args, **kwargs)
+=======
+    title = models.CharField(max_length=255)
+>>>>>>> main
     
     def __str__(self):
         return self.title
@@ -65,11 +78,13 @@ class OrderedModel(models.Model):
 
 
 class BaseContentSessionModel(BaseModel):
+    user_id = models.UUIDField()
     started_at = models.DateTimeField(auto_now_add=True)
-    finished_at = models.DateTimeField(blank=True)
+    finished_at = models.DateTimeField(blank=True, null=True)
     stars = models.PositiveSmallIntegerField(default=0)
-    complition = models.CharField(choices=TaskCompletionType.choices)
-    result = models.CharField(choices=TaskResultType.choices)
+    complition = models.CharField(choices=TaskCompletionType.choices, default=TaskCompletionType.started)
+    result = models.CharField(choices=TaskResultType.choices, null=True)
+    tries = models.PositiveSmallIntegerField(default=0)
 
     class Meta:
         ordering = ['started_at']
