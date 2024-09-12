@@ -140,7 +140,7 @@ class TaskInline(MyNestedStackedInline):
 
     model = models.Task 
     extra = 0  
-    inlines = [AnswerInline, TaskInlineSelf]
+    inlines = [AnswerInline, TaskInlineSelf, TaskItemInline]
 
     def get_queryset(self, *args, **kwargs):
         return self.model.objects.filter(parent=None).order_by('parent', 'order')
