@@ -5,7 +5,7 @@ from config.models import ContentBaseModel, OrderedModel, BaseModel
 class Course(ContentBaseModel):
     lessons_per_day = models.IntegerField(default=1)
     modules = models.ManyToManyField('courses.Module' ,through="courses.CourseModule")
-
+ 
 
 class CourseModule(BaseModel, OrderedModel):
     course = models.ForeignKey('courses.Course', on_delete=models.CASCADE)

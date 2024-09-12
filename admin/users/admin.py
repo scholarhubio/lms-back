@@ -8,11 +8,38 @@ from django.contrib.auth.models import Permission
 class UserProfileInline(admin.StackedInline):
     model = Profile
     extra = 0
-    change_form_template = 'users/admin/change_form.html'
+    change_form_template = "users/admin/change_form.html"
 
 
 class CustomizedUserAdmin(UserAdmin):
     fieldsets = (
+<<<<<<< HEAD
+        (
+            None,
+            {
+                "fields": (
+                    "username",
+                    "password",
+                )
+            },
+        ),
+        (
+            _("Personal info"),
+            {"fields": ("first_name", "last_name", "email", "phone_number")},
+        ),
+        (
+            _("Permissions"),
+            {
+                "fields": (
+                    "is_active",
+                    "is_staff",
+                    "is_superuser",
+                    "user_permissions",
+                ),
+            },
+        ),
+        (_("Important dates"), {"fields": ("last_login", "date_joined")}),
+=======
         (None, {'fields': ('username', 'password')}),
         (_('Personal info'), {'fields': ('first_name', 'last_name', 'email', 'phone_number')}),
         (_('Permissions'), {
@@ -21,10 +48,26 @@ class CustomizedUserAdmin(UserAdmin):
                 'user_permissions', 'groups',),
         }),
         (_('Important dates'), {'fields': ('last_login', 'date_joined')}),
+>>>>>>> main
     )
-    list_display = ('id', 'username', 'email', 'first_name', 'last_name', 'is_staff', 'phone_number')
-    search_fields = ['phone', 'first_name', 'last_name',]
+    list_display = (
+        "id",
+        "username",
+        "email",
+        "first_name",
+        "last_name",
+        "is_staff",
+        "phone_number",
+    )
+    search_fields = [
+        "phone",
+        "first_name",
+        "last_name",
+    ]
     list_per_page = 10
-    inlines = [UserProfileInline,]
+    inlines = [
+        UserProfileInline,
+    ]
+
 
 admin.site.register(User, CustomizedUserAdmin)

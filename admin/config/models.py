@@ -34,7 +34,17 @@ class BaseModel(UUIDMixin, TimeStampMixin):
 
 
 class ContentBaseModel(UUIDMixin, TimeStampMixin):
+<<<<<<< HEAD
+    title = models.CharField(max_length=255, verbose_name="Заголовок модуля")
+    slug = models.SlugField(max_length=255, unique=True, blank=True, verbose_name="Ссылка")
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = slugify(self.title)
+        super().save(*args, **kwargs)
+=======
     title = models.CharField(max_length=255)
+>>>>>>> main
     
     def __str__(self):
         return self.title

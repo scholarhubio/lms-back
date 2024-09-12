@@ -1,8 +1,31 @@
 from django.contrib import admin, messages
+<<<<<<< HEAD
+from django.http.request import HttpRequest
+
+=======
+>>>>>>> main
 from django.db import models as django_models
 from django.http.request import HttpRequest
 from courses import models
 from django.forms import Textarea
+<<<<<<< HEAD
+from django import forms
+from nested_admin import NestedModelAdmin, NestedTabularInline
+
+
+admin.site.site_header = "Администрирование платформы Scholar"
+admin.site.site_title = "Администрирование платформы Scholar"
+
+
+class MyNestedTabularAdmin(NestedTabularInline):
+    formfield_overrides = {
+        django_models.TextField: {
+            "widget": admin.widgets.AdminTextareaWidget(
+                attrs={"rows": 2, "cols": 80, "style": "height: 4em; width: 30em;"}
+            )
+        }
+    }
+=======
 from nested_admin import (
     NestedModelAdmin,
     NestedStackedInline,
@@ -22,6 +45,7 @@ class SoftDeleteInlineFormSet(BaseInlineFormSet):
         obj.is_deleted = True
         if commit:
             obj.save()  # Save the object to update the `is_deleted` flag
+>>>>>>> main
 
 
 class MyNestedModelAdmin(NestedModelAdmin):
@@ -34,6 +58,10 @@ class MyNestedModelAdmin(NestedModelAdmin):
     # Переопределение виджета для полей TextField.
     formfield_overrides = {
         django_models.TextField: {
+<<<<<<< HEAD
+            "widget": admin.widgets.AdminTextareaWidget(
+                attrs={"rows": 2, "cols": 80, "style": "height: 4em; width: 30em;"}
+=======
             'widget': admin.widgets.AdminTextareaWidget(
                 attrs={
                     'rows': 2,  # Установка количества строк в текстовой области.
@@ -70,6 +98,7 @@ class MyNestedStackedInline(NestedStackedInline):
                     'cols': 80,  # Установка количества колонок в текстовой области.
                     'style': 'height: 4em; width: 30em;'  # Задание стилей для текстовой области.
                 }
+>>>>>>> main
             )
         }
     }
@@ -84,9 +113,27 @@ class MyNestedStackedInline(NestedStackedInline):
         self.message_user(request, f"{obj} has been soft deleted.", level=messages.INFO)
 
 
+<<<<<<< HEAD
+######################################################
+# NEW INLINES
+# AUTHOR: SULTANOV ASADBEK
+######################################################
+@admin.register(models.Course)
+class CourseAdmin(NestedModelAdmin):
+    list_display = (
+        "title",
+        "lessons_per_day",
+    )
+
+    readonly_fields = ("slug",)
+
+    def view_students_link(self, obj):
+        count = obj.person_set.count
+=======
 class AnswerInline(MyNestedStackedInline):
     """
     Класс для настройки инлайн-администрирования модели Answer с использованием NestedStackedInline.
+>>>>>>> main
 
     Атрибуты:
         model (Model): Модель, используемая для инлайн-администрирования.
@@ -94,23 +141,72 @@ class AnswerInline(MyNestedStackedInline):
         formfield_overrides (dict): Переопределение виджета для текстовых полей.
     """
 
+<<<<<<< HEAD
+class AnswerInline(MyNestedTabularAdmin):
+    # input forms: text, is_correct, manual
+    classes = ("collapse", "wide")
+    verbose_name = "AnswerInline"  # note
+=======
+>>>>>>> main
     model = models.Answer
     extra = 0
     
     # Переопределение виджета для полей TextField.
     formfield_overrides = {
         django_models.TextField: {
+<<<<<<< HEAD
+            "widget": Textarea()
+        }  # optional, set Textarea attributes `attrs={'rows':2, 'cols':8}`
+    }
+
+
+class TaskItemInline(MyNestedTabularAdmin):
+=======
             'widget': Textarea()  # Настройка атрибутов текстовой области (опционально).
         }
     }
 
 
 class TaskItemInline(MyNestedStackedInline):
+>>>>>>> main
     model = models.TaskItem
     verbose_name = "Item"
     extra = 1
 
 
+<<<<<<< HEAD
+class TaskInlineSelf(MyNestedTabularAdmin):
+    # input forms: title, slug, order, unit, type
+    classes = ("collapse", "wide")
+    verbose_name = "subtask"
+    model = models.Task
+    extra = 1
+    readonly_fields = ("slug",)
+
+
+class TaskInLine(MyNestedTabularAdmin):
+    readonly_fields = ("slug",)
+    exclude = ("parent", "is_deleted")
+    classes = ("collapse", "wide")
+    model = models.Task
+    extra = 1
+    inlines = (AnswerInline, TaskInlineSelf, TaskItemInline)
+
+
+class UnitItemInline(MyNestedTabularAdmin):
+    classes = ("collapse", "wide")
+    model = models.UnitItem
+    extra = 1
+    readonly_fields = ("slug",)
+
+
+class UnitInLine(MyNestedTabularAdmin):
+    classes = ("collapse", "wide")
+    readonly_fields = ("slug",)
+    model = models.Unit
+    extra = 1
+    inlines = (TaskInLine, UnitItemInline)
+=======
 class TaskInlineSelf(MyNestedStackedInline):
     """
     Класс для настройки инлайн-администрирования модели Task в виде вложенной модели.
@@ -175,10 +271,18 @@ class UnitInline(MyNestedStackedInline):
     model = models.Unit
     extra = 0  
     inlines = [TaskInline, UnitItemInline]
+>>>>>>> main
 
 
 @admin.register(models.Module)
 class ModuleAdmin(MyNestedModelAdmin):
+<<<<<<< HEAD
+    list_display = ("title", "slug")
+    readonly_fields = ("slug",)
+    inlines = (UnitInLine,)
+
+    fields = (("title", "slug"),)
+=======
     """
     Класс для настройки административного интерфейса модели Module с использованием 
     пользовательского класса MyNestedModelAdmin.
@@ -280,3 +384,4 @@ class UserModuleSessionAdmin(MyNestedModelAdmin):
 @admin.register(UserUnitSession)
 class UserUnitSessionAdmin(MyNestedModelAdmin):
     list_display = ('unit',)
+>>>>>>> main
