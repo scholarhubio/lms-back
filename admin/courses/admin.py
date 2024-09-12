@@ -105,6 +105,12 @@ class AnswerInline(MyNestedStackedInline):
     }
 
 
+class TaskItemInline(MyNestedStackedInline):
+    model = models.TaskItem
+    verbose_name = "subtask"
+    extra = 1
+
+
 class TaskInlineSelf(MyNestedStackedInline):
     """
     Класс для настройки инлайн-администрирования модели Task в виде вложенной модели.
