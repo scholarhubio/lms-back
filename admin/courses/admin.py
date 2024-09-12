@@ -107,7 +107,7 @@ class AnswerInline(MyNestedStackedInline):
 
 class TaskItemInline(MyNestedStackedInline):
     model = models.TaskItem
-    verbose_name = "subtask"
+    verbose_name = "Item"
     extra = 1
 
 
