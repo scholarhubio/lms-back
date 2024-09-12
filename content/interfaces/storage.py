@@ -15,3 +15,7 @@ class IUserStorage(ABC):
     @abstractmethod
     async def create_new_user(self, phone: str, password: str, session: AsyncSession) -> User:
         pass
+
+    @abstractmethod
+    async def update(self, user: User) -> None:
+        pass

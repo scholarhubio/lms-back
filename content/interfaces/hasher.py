@@ -8,3 +8,7 @@ class IHasher(ABC):
     @abstractmethod
     async def verify_password(self, password: str, hashed_password: str) -> bool:
         pass
+
+    @abstractmethod
+    async def random_password(self) -> str:
+        pass

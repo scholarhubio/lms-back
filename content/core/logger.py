@@ -53,27 +53,27 @@ LOGGING = {
     },
     'loggers': {
         'my_app': {
-            'handlers': ['info_file', 'error_file'],
+            'handlers': ['info_file', 'error_file', 'console'],
             'level': 'INFO',
             'propagate': True,
         },
         'stdout': {
-            'handlers': ['stdout'],
+            'handlers': ['stdout', 'console'],
             'level': 'INFO',
             'propagate': False,
         },
         'stderr': {
-            'handlers': ['stderr'],
+            'handlers': ['stderr', 'console'],
             'level': 'ERROR',
             'propagate': False,
         },
         'uvicorn.error': {
-            'handlers': ['error_file'],
+            'handlers': ['error_file', 'console'],
             'level': 'ERROR',
             'propagate': False,
         },
         'uvicorn.access': {
-            'handlers': ['info_file'],
+            'handlers': ['info_file', 'console'],
             'level': 'INFO',
             'propagate': False,
         },

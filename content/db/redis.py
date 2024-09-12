@@ -21,6 +21,9 @@ class Client(ICasheClient):
     
     async def delete(self, key: str):
         return await super().delete(key)
+    
+    async def get_from_cashe(self, key: str):
+        return await self.redis.getex(key)
 
 
 async def get_redis():

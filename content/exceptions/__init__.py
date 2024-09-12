@@ -39,6 +39,11 @@ NotFound = HTTPException(
     detail="Not found")
 
 
+UserNotFound = HTTPException(
+    status_code=status.HTTP_404_NOT_FOUND,
+    detail="User Not found")
+
+
 TokenDenied = HTTPException(
     status_code=status.HTTP_401_UNAUTHORIZED,
     detail="Token has been revoked or denied",
@@ -55,4 +60,28 @@ AlreadyChoosen = HTTPException(
 TaskAnswered = HTTPException(
     status_code=status.HTTP_409_CONFLICT,
     detail="The task was already answered",
+)
+
+
+CodeAlreadySent = HTTPException(
+    status_code=status.HTTP_409_CONFLICT,
+    detail="The code was already sent",
+)
+
+
+AlreadyVerified = HTTPException(
+    status_code=status.HTTP_409_CONFLICT,
+    detail="Already verified",
+)
+
+
+UnverifiedUser = HTTPException(
+    status_code=status.HTTP_409_CONFLICT,
+    detail="Unverified user",
+)
+
+
+CodeExpired = HTTPException(
+    status_code=status.HTTP_400_BAD_REQUEST,
+    detail="Code expired or wrong code",
 )

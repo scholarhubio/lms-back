@@ -47,3 +47,7 @@ class JWTUserData(BaseModel):
 class UserRegistration(ValidPhoneBase):
     phone: str = Field(description="phone", default='+998901231212')
     password: str = Field(description="password")
+
+
+class UserVerification(ValidPhoneBase):
+    code: int

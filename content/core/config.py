@@ -42,9 +42,18 @@ class Auth(BaseSettings):
     model_config: str = SettingsConfigDict(env_prefix='auth_')
 
 
+class PlayMobile(BaseSettings):
+    url: str = ...
+    username: str = ...
+    password: str = ...
+    originator: str = ...
+    model_config: str = SettingsConfigDict(env_prefix='playmobile_')
+
+
 class Settings(BaseSettings):
     project_name: str = "LMS API"
     postgres: PostgresSettings = PostgresSettings()
     redis: RedisSettings = RedisSettings()
     auth: Auth = Auth()
     hasher: Hasher = Hasher()
+    sms_broker: PlayMobile = PlayMobile()

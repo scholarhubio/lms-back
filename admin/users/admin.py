@@ -13,7 +13,7 @@ class UserProfileInline(admin.StackedInline):
 
 class CustomizedUserAdmin(UserAdmin):
     fieldsets = (
-        (None, {'fields': ('username', 'password')}),
+        (None, {'fields': ('username', 'password', 'role',)}),
         (_('Personal info'), {'fields': ('first_name', 'last_name', 'email', 'phone_number')}),
         (_('Permissions'), {
             'fields': (

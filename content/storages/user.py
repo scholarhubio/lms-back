@@ -2,6 +2,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from models import User
 from interfaces.storage import IUserStorage
+from exceptions import IntegrityError
 
 
 class UserStorage(IUserStorage):
@@ -25,6 +26,13 @@ class UserStorage(IUserStorage):
             await session.refresh(new_user)
         return new_user
 
+    async def update(self, user: User, session: AsyncSession):
+        async with session:
+            session.add(user)
+            try:
+                await session.commit()
+            except:
+                raise IntegrityError
 
 async def get_user_storage() -> UserStorage:
     return UserStorage()

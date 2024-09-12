@@ -6,7 +6,9 @@ from db.postgres import get_async_session
 from repositories import IRoleRepository
 from dal.postgres import get_postgres_dal, IDAL
 from factories import get_role_repo_factory, IRoleRepositoryFactory
-from models.users.choices import RoleType
+from models.users import User
+from services.auth import get_current_user
+
 
 class ICourseService(ABC):
 
@@ -33,11 +35,11 @@ class CourseService(ICourseService):
 async def get_course_service(
         fact: IRoleRepositoryFactory = Depends(get_role_repo_factory),
         session: AsyncSession = Depends(get_async_session),
-        dal: IDAL = Depends(get_postgres_dal),):
-    repo = await fact.get_repository(UserSchema(role=RoleType.CEO.value))
+        dal: IDAL = Depends(get_postgres_dal),
+        user: User = Depends(get_current_user),):
+    repo = await fact.get_repository(UserSchema(role=user.role))
     dal.session = session
     repo.dal = dal
-    user = UserSchema(role='student')
     return CourseService(
         repository=repo,
         user=user,
