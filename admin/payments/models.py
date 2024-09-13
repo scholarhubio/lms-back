@@ -9,7 +9,7 @@ from datetime import date
 class Subscription(BaseModel):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     course_module = models.ForeignKey(CourseModule, on_delete=models.CASCADE)
-    start_date = models.DateField(auto_now_add=True)
+    start_date = models.DateField()
     end_date = models.DateField()
     is_active = models.BooleanField(default=True)
 
