@@ -18,6 +18,7 @@ class User(AbstractUser, BaseModel):
     role = models.CharField(choices=RoleType.choices, max_length=20)
     date_joined = models.DateTimeField(null=True)
     username_validator = UnicodeUsernameValidator()
+    subscribed_modules = models.ManyToManyField('courses.CourseModule' ,through="payments.Subscription")
     username = models.CharField(
         _('username'),
         max_length=150,

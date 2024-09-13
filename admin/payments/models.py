@@ -9,9 +9,12 @@ from datetime import date
 class Subscription(BaseModel):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     course_module = models.ForeignKey(CourseModule, on_delete=models.CASCADE)
-    start_date = models.DateField(default=date.today())
+    start_date = models.DateField(auto_now_add=True)
     end_date = models.DateField()
     is_active = models.BooleanField(default=True)
+
+    def __str__(self) -> str:
+        return f"{self.user.phone_number}: from {self.start_date} to {self.end_date}"
 
 
 class Transaction(BaseModel):

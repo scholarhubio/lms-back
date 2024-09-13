@@ -1,9 +1,10 @@
-from django.contrib import admin
+from django.contrib import admin, messages
 from django.contrib.auth.admin import UserAdmin
 from users.models import Profile, User
 from django.utils.translation import gettext_lazy as _
 from django.contrib.auth.models import Permission
 from config.admin import BaseModelAdmin, BaseStackedInline
+from users.forms import SubscriptionInlineForm
 
 
 class UserProfileInline(BaseStackedInline):
@@ -28,5 +29,6 @@ class CustomizedUserAdmin(UserAdmin, BaseModelAdmin):
     list_filter = ('role',)
     list_per_page = 10
     inlines = [UserProfileInline,]
+
 
 admin.site.register(User, CustomizedUserAdmin)
