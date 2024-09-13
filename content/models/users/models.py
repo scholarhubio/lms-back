@@ -6,6 +6,7 @@ from models.base import BaseModel
 from typing import Optional
 from datetime import datetime, date
 from models.users.choices import RoleType
+from models.payments.models import Subscription
 from uuid import UUID
 
 
@@ -22,6 +23,7 @@ class User(BaseModel):
     password: Mapped[str] = mapped_column(String(255), unique=True)
     role: Mapped[RoleType] = Column(String(10), SQLAlchemyEnum(RoleType, create_type=True, name='roletype'), nullable=False)
     profile: Mapped[Optional['Profile']] = relationship('Profile', uselist=False, back_populates='user', cascade='all, delete-orphan')
+    subscriptions: Mapped[list['Subscription']] = relationship('Subscription', back_populates='user')
 
     @validates('phone_number')
     def validate_phone_number(self, key: str, value: str) -> str:

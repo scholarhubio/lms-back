@@ -6,6 +6,9 @@ from courses.choices import UnitType
 class Module(ContentBaseModel):
     courses = models.ManyToManyField('courses.Course' ,through="courses.CourseModule")
 
+    def __str__(self):
+        return self.title
+
 
 class Unit(ContentBaseModel, OrderedModel):
     module = models.ForeignKey('courses.Module', on_delete=models.CASCADE)
@@ -16,6 +19,9 @@ class Unit(ContentBaseModel, OrderedModel):
     class Meta:
         ordering = ['module', 'order']
         unique_together = ['module', 'order']
+    
+    def __str__(self):
+        return self.title
 
 
 class UnitItem(ContentBaseModel):

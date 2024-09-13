@@ -28,8 +28,8 @@ class TimeStampMixin:
 
     __abstract__ = True
 
-    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=func.now())
-    modified_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=func.now(), onupdate=func.now())
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=False), default=func.now())
+    modified_at: Mapped[datetime] = mapped_column(DateTime(timezone=False), default=func.now(), onupdate=func.now())
 
 
 class BaseModel(Base, TimeStampMixin):

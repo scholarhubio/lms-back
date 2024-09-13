@@ -3,10 +3,12 @@ from models import User, Answer
 from models.courses.moduls import Course, CourseModule, Module, Unit, Task
 from models.courses.result import UserAnswer, UserTaskSession
 from models.courses import Answer
-from sqlalchemy import select, case
+from sqlalchemy import select, desc
 from sqlalchemy.orm import selectinload
 from uuid import UUID
 from interfaces.strategy import IQueryStrategy
+from models.payments.models import Subscription
+from datetime import date
 
 
 class StudentQueryStrategy(IQueryStrategy):
@@ -17,7 +19,15 @@ class StudentQueryStrategy(IQueryStrategy):
                     Answer.id == answer_id)
 
     async def get_courses(self, user: User) -> list[Course]:
-        return select(Course)
+        return select(Course).join_from(
+            CourseModule,
+            Subscription.course_module==CourseModule.id
+            ).where(
+                Subscription.is_active == True,
+                Subscription.user_id == user.id,
+                Subscription.start_date >= date.today(),
+                Subscription.end_date <= date.today(),
+                ).order_by(desc(CourseModule.order))
 
     async def get_modules(self, course_id: UUID, user_id: UUID) -> list[Course]:
         return select(

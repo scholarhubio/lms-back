@@ -4,6 +4,7 @@ from typing import Optional
 from models import ContentBaseModel, Course, OrderedModel, Task
 from models.courses.choices import UnitType
 from models.courses.result import UserModuleSession
+from models.payments.models import Subscription
 from uuid import UUID
 
 
@@ -54,6 +55,7 @@ class CourseModule(ContentBaseModel, OrderedModel):
 
     course: Mapped['Course'] = relationship('Course', back_populates='course_modules')
     module: Mapped['Module'] = relationship('Module', back_populates='module_courses')
+    subscriptions: Mapped[list['Subscription']] = relationship('Subscription', back_populates='course_module')
 
     __table_args__ = (
         UniqueConstraint('course_id', 'order', name='unique_course_order'),
