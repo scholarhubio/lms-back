@@ -5,7 +5,11 @@ services:
       context: admin
       dockerfile: dockerfile
     container_name: django_admin
-    command: poetry run gunicorn config.asgi:application --config config/gunicorn_config.py #python3 manage.py runserver 0.0.0.0:8000 #
+    command: >
+      bash -c "
+      poetry run python3 manage.py collectstatic --noinput &&
+      poetry run gunicorn config.asgi:application --config config/gunicorn_config.py
+      "
     environment:
       PYTHONPATH: /opt/app
       TZ: UTC

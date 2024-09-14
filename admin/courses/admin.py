@@ -48,7 +48,7 @@ class TaskInlineSelf(MyNestedStackedInline):
         extra (int): Количество дополнительных пустых форм, отображаемых в админке (по умолчанию 0).
     """
 
-    model = models.Task 
+    model = models.Task
     verbose_name = "subtask" 
     extra = 0
 
@@ -65,8 +65,8 @@ class TaskInline(MyNestedStackedInline):
         inlines (list): Список вложенных инлайн-классов, которые будут отображаться вместе с основной моделью.
     """
 
-    model = models.Task 
-    extra = 0  
+    model = models.Task
+    extra = 0
     inlines = [AnswerInline, TaskInlineSelf, TaskItemInline]
 
     def get_queryset(self, *args, **kwargs):
