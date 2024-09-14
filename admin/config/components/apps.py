@@ -14,5 +14,4 @@ INSTALLED_APPS = [
     'nested_admin',
     'ckeditor',
     'ckeditor_uploader',
-    'django_ckeditor_5',
 ]
