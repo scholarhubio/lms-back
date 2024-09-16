@@ -1,5 +1,5 @@
 from django.db import models
-from config.models import ContentBaseModel, OrderedModel
+from config.models import ContentBaseModel, OrderedModel, BaseModel
 from courses.choices import UnitType
 
 
@@ -12,7 +12,7 @@ class Module(ContentBaseModel):
 
 class Unit(ContentBaseModel, OrderedModel):
     module = models.ForeignKey('courses.Module', on_delete=models.CASCADE)
-    description = models.TextField()
+    description = models.TextField(null=True, blank=True)
     type = models.CharField(choices=UnitType.choices, default=UnitType.paid.value)
     order = models.PositiveIntegerField(blank=True, null=True)
 
@@ -24,6 +24,6 @@ class Unit(ContentBaseModel, OrderedModel):
         return self.title
 
 
-class UnitItem(ContentBaseModel):
+class UnitItem(BaseModel):
     unit = models.OneToOneField('courses.Unit', on_delete=models.CASCADE)
     description = models.TextField(blank=True)

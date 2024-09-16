@@ -5,7 +5,10 @@ from models.courses.choices import TaskCompletionType, TaskResultType
 from datetime import datetime
 from typing import Optional
 from models import BaseModel
+from models.courses.moduls import Module
 from uuid import UUID
+from sqlalchemy import select
+from sqlalchemy.orm import aliased
 
 
 class BaseContentSessionModel(BaseModel):
@@ -68,3 +71,14 @@ class UserModuleSession(BaseContentSessionModel):
 
     def __str__(self) -> str:
         return f'Module Session for Module ID: {self.module_id}'
+
+    async def last_user_session_subquery(self, user_id: UUID):
+        latest_session = aliased(UserModuleSession)
+        # Subquery to get the latest session for each module for the given user
+        return select(
+                latest_session
+            ).where(
+                latest_session.module_id == Module.id,
+                latest_session.user_id == user_id
+            ).order_by(latest_session.created_at.desc()
+                       ).limit(1).scalar_subquery()

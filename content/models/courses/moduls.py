@@ -1,7 +1,7 @@
 from sqlalchemy import String, Text, ForeignKey, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from typing import Optional
-from models import ContentBaseModel, Course, OrderedModel, Task
+from models import ContentBaseModel, Course, OrderedModel, Task, BaseModel
 from models.courses.choices import UnitType
 from models.courses.result import UserModuleSession
 from models.payments.models import Subscription
@@ -25,7 +25,7 @@ class Unit(ContentBaseModel, OrderedModel):
     __tablename__ = 'courses_unit'
 
     module_id: Mapped[UUID] = mapped_column(ForeignKey('courses_module.id'), nullable=False)
-    description: Mapped[str] = mapped_column(Text, nullable=False)
+    description: Mapped[str] = mapped_column(Text, nullable=True, )
     type: Mapped[str] = mapped_column(String(50), nullable=False, default=UnitType.PAID.value)
 
     module: Mapped['Module'] = relationship('Module', back_populates='units')
@@ -35,7 +35,7 @@ class Unit(ContentBaseModel, OrderedModel):
         return f'Unit in {self.module.title}'
 
 
-class UnitItem(ContentBaseModel):
+class UnitItem(BaseModel):
     __tablename__ = 'courses_unititems'
 
     unit_id: Mapped[UUID] = mapped_column(ForeignKey('courses_unit.id'), unique=True, nullable=False)

@@ -4,7 +4,7 @@ from models.courses.moduls import Course, CourseModule, Module, Unit, Task
 from models.courses.result import UserAnswer, UserTaskSession
 from models.courses import Answer
 from sqlalchemy import select, desc
-from sqlalchemy.orm import selectinload
+from sqlalchemy.orm import selectinload, aliased
 from uuid import UUID
 from interfaces.strategy import IQueryStrategy
 from models.payments.models import Subscription
@@ -30,13 +30,40 @@ class StudentQueryStrategy(IQueryStrategy):
                 ).order_by(desc(CourseModule.order))
 
     async def get_modules(self, course_id: UUID, user_id: UUID) -> list[Course]:
-        return select(
-            Module
-            ).join(
+        latest_session = aliased(UserModuleSession)
+
+        # Subquery to get the latest session for each module for the given user
+        subquery = (
+            select(
+                latest_session
+            )
+            .where(
+                latest_session.module_id == Module.id,
+                latest_session.user_id == user_id
+            )
+            .order_by(latest_session.created_at.desc())
+            .limit(1)
+            .scalar_subquery()
+        )
+        query = (
+            select(
+                Module,
+                subquery.label("last_session")
+            )
+            .join(
                 CourseModule,
-                CourseModule.module_id == Module.id).where(
-                    CourseModule.course_id == course_id,
-                    ).order_by(CourseModule.order)
+                CourseModule.module_id == Module.id
+            )
+            .outerjoin(
+                latest_session,
+                latest_session.id == subquery
+            )
+            .where(
+                CourseModule.course_id == course_id
+            )
+            .order_by(CourseModule.order)
+        )
+        return query
 
     async def get_units(self, module_id: UUID) -> list[Course]:
         return select(
