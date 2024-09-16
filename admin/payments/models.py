@@ -13,6 +13,9 @@ class Subscription(BaseModel):
     end_date = models.DateField()
     is_active = models.BooleanField(default=True)
 
+    class Meta:
+        unique_together = ('user', 'course_module',)
+
     def __str__(self) -> str:
         return f"{self.user.phone_number}: from {self.start_date} to {self.end_date}"
 

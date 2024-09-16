@@ -4,7 +4,7 @@ from courses.choices import TaskType, ItemType
 from ckeditor.fields import RichTextField
 
 
-class Task(ContentBaseModel, OrderedModel):
+class Task(BaseModel, OrderedModel):
     parent = models.ForeignKey('self',
                                on_delete=models.CASCADE,
                                verbose_name="Родитель",

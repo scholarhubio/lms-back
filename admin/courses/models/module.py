@@ -15,7 +15,7 @@ class Unit(ContentBaseModel, OrderedModel):
     description = models.TextField(null=True, blank=True)
     type = models.CharField(choices=UnitType.choices, default=UnitType.paid.value)
     order = models.PositiveIntegerField(blank=True, null=True)
-
+    video = models.CharField()
     class Meta:
         ordering = ['module', 'order']
         unique_together = ['module', 'order']

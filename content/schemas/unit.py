@@ -8,6 +8,7 @@ class UnitSession(BaseSessionSchema):
 
 
 class UnitSchema(BaseSchema):
+    video: str | None = None
     description: str | None = None
     order: int
     title: str | None = None

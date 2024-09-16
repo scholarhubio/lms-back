@@ -20,7 +20,6 @@ class TaskItem(BaseSchema):
 
 
 class TaskSchema(BaseSchema):
-    title: str
     complition: str | None = None
     stars: int | None = None
     type: str | None = None
@@ -33,7 +32,6 @@ class TaskWithAnswersSchema(TaskSchema):
 
 
 class PureTaskSchema(BaseSchema):
-    title: str
     text: str
     order: int
     unit_id: UUID

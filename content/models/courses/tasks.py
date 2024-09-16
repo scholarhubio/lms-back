@@ -7,7 +7,7 @@ from models.courses.choices import TaskType, ItemType
 import uuid
 
 
-class Task(ContentBaseModel, OrderedModel):
+class Task(BaseModel, OrderedModel):
     __tablename__ = 'courses_task'
 
     parent_id: Mapped[Optional[uuid.UUID]] = mapped_column(
