@@ -99,9 +99,10 @@ class StudentQueryStrategy(IQueryStrategy):
     async def get_tasks(self, unit_id: UUID) -> list[Task]:
         return select(
             Task).options(
+                selectinload(Task.items),
                 selectinload(Task.answers),
                 selectinload(Task.sessions.and_(
-                    Task.id==UserTaskSession.task_id)),
+                    Task.id == UserTaskSession.task_id)),
                 with_loader_criteria(
                     UserTaskSession,
                     lambda UserTaskSession: UserTaskSession.created_at == (
