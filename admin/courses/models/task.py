@@ -22,7 +22,7 @@ class Task(ContentBaseModel, OrderedModel):
 class TaskItem(BaseModel):
     task = models.ForeignKey('courses.Task', on_delete=models.CASCADE)
     link = models.CharField(max_length=255)
-    type = models.CharField(choices=ItemType.choices)
+    video = models.CharField(max_length=255)
 
 
 class Answer(BaseModel):

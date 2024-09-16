@@ -30,7 +30,7 @@ class AuthSettingsSchema(BaseModel):
     authjwt_denylist_token_checks: set = {"access", "refresh"}
     authjwt_algorithm: str = settings.auth.algorithm
     authjwt_private_key: str = settings.auth.private_key
-    access_expires: int = timedelta(minutes=360)
+    access_expires: int = timedelta(minutes=60)
     refresh_expires: int = timedelta(days=30)
 
 

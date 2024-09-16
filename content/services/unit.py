@@ -6,7 +6,7 @@ from db.postgres import get_async_session
 from repositories import IRoleRepository
 from dal.postgres import get_postgres_dal, IDAL
 from factories import get_role_repo_factory, IRoleRepositoryFactory
-from models.users import User
+from models.users.models import User
 from models.courses.result import UserUnitSession
 from models.courses.moduls import Unit
 from services.auth import get_current_user
@@ -34,7 +34,7 @@ class UnitService(IUnitService):
     async def get_units(self, module_id: UUID):
         await self.create_user_module_session(module_id=module_id)
         units = await self.repository.get_units(module_id=module_id)
-        return await self.add_status(units)
+        return units#await self.add_status(units)
 
     async def create_user_module_session(self, module_id: UUID):
         await self.repository.create_user_module_session(module_id=module_id, user_id=self.user.id)

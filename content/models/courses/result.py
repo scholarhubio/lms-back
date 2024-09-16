@@ -4,8 +4,8 @@ from sqlalchemy.types import Enum as SQLAlchemyEnum
 from models.courses.choices import TaskCompletionType, TaskResultType
 from datetime import datetime
 from typing import Optional
-from models import BaseModel
-from models.courses.moduls import Module
+from models.base import BaseModel
+from models.courses.moduls import Module, Unit
 from uuid import UUID
 from sqlalchemy import select
 from sqlalchemy.orm import aliased
@@ -56,7 +56,7 @@ class UserUnitSession(BaseContentSessionModel):
     __tablename__ = 'courses_userunitsession'
 
     unit_id: Mapped[Optional[UUID]] = mapped_column(ForeignKey('courses_unit.id'), nullable=True)
-    unit: Mapped[Optional['Unit']] = relationship('Unit')  # Assuming the 'Unit' model exists
+    unit: Mapped[Optional['Unit']] = relationship('Unit', back_populates='sessions')  # Assuming the 'Unit' model exists
 
 
     def __str__(self) -> str:

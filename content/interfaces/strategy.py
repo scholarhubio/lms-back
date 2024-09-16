@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from models.courses.moduls import Course, Module, Unit, Task
-from models.courses import UserModuleSession, UserUnitSession, UserTaskSession, UserAnswer
-from models.users import User
+from models.courses.result import UserModuleSession, UserUnitSession, UserTaskSession, UserAnswer
+from models.users.models import User
 from uuid import UUID
 
 

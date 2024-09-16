@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import Optional
-from models import User
+from models.users.models import User
 
 class IUserStorage(ABC):
     @abstractmethod

@@ -1,10 +1,9 @@
-from models.courses import UserModuleSession, UserUnitSession
-from models import User, Answer
+from models.courses.result import UserModuleSession, UserUnitSession, UserAnswer, UserTaskSession
+from models.users.models import User
 from models.courses.moduls import Course, CourseModule, Module, Unit, Task
-from models.courses.result import UserAnswer, UserTaskSession
-from models.courses import Answer
-from sqlalchemy import select, desc
-from sqlalchemy.orm import selectinload, aliased
+from models.courses.tasks import Answer
+from sqlalchemy import select, desc, func
+from sqlalchemy.orm import selectinload, aliased, with_loader_criteria
 from uuid import UUID
 from interfaces.strategy import IQueryStrategy
 from models.payments.models import Subscription
@@ -14,7 +13,7 @@ from datetime import date
 class StudentQueryStrategy(IQueryStrategy):
     async def get_task_by_answer(self, answer_id: UUID) -> Task:
         return select(
-            Task).join(
+            Task).options(selectinload(Task.items)).join(
                 Answer).where(
                     Answer.id == answer_id)
 
@@ -30,33 +29,25 @@ class StudentQueryStrategy(IQueryStrategy):
                 ).order_by(desc(CourseModule.order))
 
     async def get_modules(self, course_id: UUID, user_id: UUID) -> list[Course]:
-        latest_session = aliased(UserModuleSession)
-
-        # Subquery to get the latest session for each module for the given user
-        subquery = (
-            select(
-                latest_session
-            )
-            .where(
-                latest_session.module_id == Module.id,
-                latest_session.user_id == user_id
-            )
-            .order_by(latest_session.created_at.desc())
-            .limit(1)
-            .scalar_subquery()
-        )
         query = (
             select(
-                Module,
-                subquery.label("last_session")
-            )
+                Module
+            ).options(
+                selectinload(Module.sessions.and_(
+                    Module.id==UserModuleSession.module_id)),
+                with_loader_criteria(
+                    UserModuleSession,
+                    lambda UserModuleSession: UserModuleSession.created_at == (
+                        select(func.max(UserModuleSession.created_at))
+                        .where(
+                            UserModuleSession.module_id == Module.id,
+                            )
+                        .correlate(Module)
+                        .scalar_subquery()
+                    )))
             .join(
                 CourseModule,
                 CourseModule.module_id == Module.id
-            )
-            .outerjoin(
-                latest_session,
-                latest_session.id == subquery
             )
             .where(
                 CourseModule.course_id == course_id
@@ -67,7 +58,21 @@ class StudentQueryStrategy(IQueryStrategy):
 
     async def get_units(self, module_id: UUID) -> list[Course]:
         return select(
-            Unit).options(selectinload(Unit.tasks)).where(
+            Unit).options(
+                selectinload(Unit.tasks),
+                selectinload(Unit.sessions.and_(
+                    Unit.id==UserUnitSession.unit_id)),
+                with_loader_criteria(
+                    UserUnitSession,
+                    lambda UserUnitSession: UserUnitSession.created_at == (
+                        select(func.max(UserUnitSession.created_at))
+                        .where(
+                            UserUnitSession.unit_id == Unit.id,
+                            )
+                        .correlate(Unit)
+                        .scalar_subquery()
+                    ))
+                ).where(
                 Unit.module_id == module_id).order_by(Unit.order)
 
     async def get_task_highest_parent(self, task_id: UUID) -> Task:
@@ -91,8 +96,21 @@ class StudentQueryStrategy(IQueryStrategy):
 
     async def get_tasks(self, unit_id: UUID) -> list[Task]:
         return select(
-            Task).options(selectinload(Task.answers)).where(
-                Task.unit_id == unit_id).order_by(Task.order)
+            Task).options(
+                selectinload(Task.answers),
+                selectinload(Task.sessions.and_(
+                    Task.id==UserTaskSession.task_id)),
+                with_loader_criteria(
+                    UserTaskSession,
+                    lambda UserTaskSession: UserTaskSession.created_at == (
+                        select(func.max(UserTaskSession.created_at))
+                        .where(
+                            UserTaskSession.task_id == UserTaskSession.id,
+                            )
+                        .correlate(Unit)
+                        .scalar_subquery()
+                    ))).where(
+                        Task.unit_id == unit_id).order_by(Task.order)
 
     async def get_user_module_session(self, module_id: UUID, user_id: UUID) -> UserModuleSession:
         return select(
@@ -187,8 +205,10 @@ class StudentQueryStrategy(IQueryStrategy):
     
     async def get_task(self, task_id: UUID) -> Task:
         return select(
-            Task).options(selectinload(
-                Task.answers).options(selectinload(Answer.user_answer))).where(Task.id == task_id)
+            Task).options(
+                selectinload(Task.answers).options(selectinload(Answer.user_answer)),
+                selectinload(Task.items),
+                    ).where(Task.id == task_id)
 
 
 def get_student_strategy() -> StudentQueryStrategy:

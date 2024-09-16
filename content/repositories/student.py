@@ -1,4 +1,7 @@
-from models import Course, User, UserModuleSession, Task, UserTaskSession, UserUnitSession, UserAnswer
+from models.courses.course import Course
+from models.users.models import User
+from models.courses.tasks import Task
+from models.courses.result import UserModuleSession, UserUnitSession, UserAnswer, UserTaskSession
 from interfaces.strategy import IQueryStrategy
 from dal.postgres import IDAL
 from . import IRoleRepository
@@ -140,7 +143,8 @@ class StudentRepository(IRoleRepository):
 
     async def get_task(self, task_id: UUID, user_id):
         task_qr = await self.strategy.get_task(task_id)
-        return (await self.dal.execute(task_qr)).scalar_one_or_none()
+        result = (await self.dal.execute(task_qr)).scalar_one_or_none()
+        return result
 
 
 def get_student_repository(

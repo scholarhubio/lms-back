@@ -1,0 +1,173 @@
+services:
+#_____________admin______________
+  admin:
+    build:
+      context: admin
+      dockerfile: dockerfile
+    container_name: django_admin
+    command: >
+      bash -c "
+      poetry run python3 manage.py collectstatic --noinput &&
+      poetry run python3 manage.py runserver 0.0.0.0:8000
+      "
+    environment:
+      PYTHONPATH: /opt/app
+      TZ: UTC
+    env_file:
+      - .env
+    volumes:
+      - ./admin:/opt/app:rw
+      - ./admin/static:/opt/app/static:rw
+      - media_volume:/opt/app/media:rw
+      - ./logs/admin:/opt/app/logs:rw
+    depends_on:
+      content_db:
+        condition: service_started
+      redis:
+        condition: service_started
+    networks:
+      - app-network
+
+  content_api:
+    build:
+      context: content
+      dockerfile: dockerfile
+    container_name: content_api
+    command: poetry run uvicorn app:app --port 8080 --reload --host 0.0.0.0
+    environment:
+      PYTHONPATH: /opt/app
+      TZ: UTC
+    ports:
+      - 8001:8080
+    env_file:
+      - .env
+    volumes:
+      - ./content:/opt/app:rw
+      - ./logs/api:/opt/app/logs:rw
+    depends_on:
+      content_db:
+        condition: service_started
+      redis:
+        condition: service_started
+    networks:
+      - app-network
+
+  content_db:
+    image: postgres:16.4-alpine3.20
+    container_name: content_db
+    env_file:
+      .env
+    environment:
+      - POSTGRES_PASSWORD=${CONTENT_POSTGRES_PASSWORD}
+      - POSTGRES_USER=${CONTENT_POSTGRES_USER}
+      - POSTGRES_DB=${CONTENT_POSTGRES_DB_NAME}
+      - POSTGRES_PORT=${CONTENT_POSTGRES_PORT}
+      - TZ=UTC
+    volumes:
+      - pg_data:/var/lib/postgresql/data:rw
+      - ./logs:/var/log/postgresql:rw
+    healthcheck:
+      test: [ "CMD-SHELL", "sh -c 'pg_isready -U ${CONTENT_POSTGRES_USER} -d ${CONTENT_POSTGRES_DB_NAME}'" ]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+    networks:
+      - app-network
+
+  pgbackups:
+    image: prodrigestivill/postgres-backup-local
+    user: postgres:postgres # Optional: see below
+    volumes:
+        - ./backups:/backups
+    links:
+        - content_db
+    depends_on:
+        - content_db
+    environment:
+        - POSTGRES_HOST=content_db
+        - POSTGRES_DB=${CONTENT_POSTGRES_DB_NAME}
+        - POSTGRES_USER=${CONTENT_POSTGRES_USER}
+        - POSTGRES_PASSWORD=${CONTENT_POSTGRES_PASSWORD}
+        - POSTGRES_EXTRA_OPTS=-Z1 --schema=public --blobs
+        - SCHEDULE=@daily
+        - BACKUP_ON_START=TRUE
+        - BACKUP_KEEP_DAYS=7
+        - BACKUP_KEEP_WEEKS=4
+        - BACKUP_KEEP_MONTHS=6
+        - HEALTHCHECK_PORT=8080
+        - TZ=UTC
+    networks:
+      - app-network
+
+  redis:
+    image: redis:7.2.3-alpine3.18
+    container_name: redis
+    env_file:
+      - .env
+    environment:
+      TZ: UTC
+    volumes:
+      - redis_data:/data:rw
+    ports:
+      - "${REDIS_PORT}:${REDIS_PORT}"
+    networks:
+      - app-network
+
+  nginx:
+    image: nginx:1.27.1-alpine-slim
+    container_name: nginx
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/django_admin_lb.conf:/etc/nginx/conf.d/django_admin_lb.conf:ro
+      - ./nginx/content_api_lb.conf:/etc/nginx/conf.d/content_api_lb.conf:ro
+      - static_volume:/opt/app/static:ro
+      - media_volume:/opt/app/media:ro
+      - ./logs/nginx:/var/log/nginx:rw
+    environment:
+      TZ: UTC
+    depends_on:
+      admin:
+        condition: service_started
+      content_api:
+        condition: service_started
+    ports:
+      - "8000:8000"
+      - "8080:8080"
+    networks:
+      - app-network
+
+  content_api_lb:
+    image: nginx:1.27.1-alpine-slim
+    container_name: content_api_lb
+    volumes:
+      - ./load_balancers/nginx.conf:/etc/nginx/nginx.conf
+      - ./load_balancers/content_api.conf:/etc/nginx/conf.d/content_api.conf:ro
+    depends_on:
+      - content_api
+    networks:
+      - app-network
+    environment:
+      TZ: UTC
+
+  admin_lb:
+    image: nginx:1.27.1-alpine-slim
+    container_name: admin_lb
+    volumes:
+      - ./load_balancers/nginx.conf:/etc/nginx/nginx.conf
+      - ./load_balancers/django_admin.conf:/etc/nginx/conf.d/django_admin.conf:ro
+    depends_on:
+      - admin
+    environment:
+      TZ: UTC
+    networks:
+      - app-network
+
+volumes:
+  static_volume:
+  media_volume:
+  pg_data:
+  redis_data:
+
+networks:
+  app-network:
+    driver: bridge

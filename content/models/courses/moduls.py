@@ -1,9 +1,10 @@
 from sqlalchemy import String, Text, ForeignKey, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from typing import Optional
-from models import ContentBaseModel, Course, OrderedModel, Task, BaseModel
+from models.courses.course import Course
+from models.courses.tasks import Task
+from models.base import BaseModel, OrderedModel, ContentBaseModel
 from models.courses.choices import UnitType
-from models.courses.result import UserModuleSession
 from models.payments.models import Subscription
 from uuid import UUID
 
@@ -25,17 +26,18 @@ class Unit(ContentBaseModel, OrderedModel):
     __tablename__ = 'courses_unit'
 
     module_id: Mapped[UUID] = mapped_column(ForeignKey('courses_module.id'), nullable=False)
-    description: Mapped[str] = mapped_column(Text, nullable=True, )
+    description: Mapped[str] = mapped_column(Text, nullable=False)
     type: Mapped[str] = mapped_column(String(50), nullable=False, default=UnitType.PAID.value)
 
     module: Mapped['Module'] = relationship('Module', back_populates='units')
+    sessions: Mapped[list['UserUnitSession']] = relationship('UserUnitSession', back_populates='unit')
     unit_item: Mapped['UnitItem'] = relationship('UnitItem', uselist=False, back_populates='unit', cascade='all, delete-orphan')
     tasks: Mapped[list['Task']] = relationship('Task', back_populates='unit', cascade='all, delete-orphan')
     def __str__(self) -> str:
         return f'Unit in {self.module.title}'
 
 
-class UnitItem(BaseModel):
+class UnitItem(ContentBaseModel):
     __tablename__ = 'courses_unititems'
 
     unit_id: Mapped[UUID] = mapped_column(ForeignKey('courses_unit.id'), unique=True, nullable=False)
@@ -47,7 +49,7 @@ class UnitItem(BaseModel):
         return f'Item of {self.unit.module.title} - {self.unit.title}'
 
 
-class CourseModule(ContentBaseModel, OrderedModel):
+class CourseModule(BaseModel, OrderedModel):
     __tablename__ = 'courses_coursemodule'
 
     course_id: Mapped[UUID] = mapped_column(ForeignKey('courses_course.id'), nullable=False)

@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, Form, Header, status
 from services.auth import get_authentication_service, IAuthenticationService
 from schemas.auth import UserLogin, UserRegistration, ValidPhoneBase, UserVerification
+from schemas.responses.auth import UserSignIn
 from typing import Annotated
 
 
@@ -20,7 +21,7 @@ async def signin(
     user: Annotated[UserLogin, Form()],
     service: IAuthenticationService = Depends(get_authentication_service),
     agent: str = Header(...),
-    ):
+    ) -> UserSignIn:
     return await service.login_user(user)
 
 

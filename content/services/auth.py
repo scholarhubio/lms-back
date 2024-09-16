@@ -7,7 +7,7 @@ from interfaces.storage import IUserStorage
 from interfaces.hasher import IHasher
 
 from models.users.choices import RoleType
-from models.users import User
+from models.users.models import User
 from storages.user import get_user_storage
 
 from core.security import CustomHTTPBearer
@@ -24,6 +24,7 @@ from datetime import datetime, timezone
 from core.utils import async_json_dumps, async_json_loads
 from broadcast.playmobile import get_playmobile, SMSClient
 from exceptions import CodeAlreadySent, UnverifiedUser, CodeExpired
+from schemas.auth import AuthSettingsSchema
 import random
 
 
@@ -89,7 +90,6 @@ class AuthenticationService:
 
     async def verify_code(self, data: UserVerification):
         code = await self.cache.get_from_cashe(data.phone)
-        print(code, '########')
         if str(code) != str(data.code) or not code:
             raise CodeExpired
         key = verification_template.format(phone=data.phone)
@@ -134,9 +134,9 @@ class AuthenticationService:
         subject = await async_json_dumps({"id": str(stored_user.id), "role": stored_user.role})
 
         # Generate access and refresh tokens with the customized subject
-        access_token = await self.Authorize.create_access_token(subject=subject, user_claims={"type": "access"})
-        refresh_token = await self.Authorize.create_refresh_token(subject=subject, user_claims={"type": "refresh"})
-        return {"access_token": access_token, "refresh_token": refresh_token}
+        access_token = await self.Authorize.create_access_token(subject=subject, user_claims={"type": "access"}, expires_time=AuthSettingsSchema().access_expires)
+        refresh_token = await self.Authorize.create_refresh_token(subject=subject, user_claims={"type": "refresh"}, expires_time=AuthSettingsSchema().refresh_expires)
+        return {"access_token": str(access_token), "refresh_token": str(refresh_token)}
 
     async def logout_user(self):
         """Logout the user and add the access token to the denied list with expiration."""

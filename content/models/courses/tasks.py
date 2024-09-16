@@ -2,9 +2,8 @@ from sqlalchemy import String, Text, Boolean, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.types import Enum as SQLAlchemyEnum
 from typing import Optional
-from models import ContentBaseModel, OrderedModel, BaseModel
+from models.base import ContentBaseModel, OrderedModel, BaseModel
 from models.courses.choices import TaskType, ItemType
-from models.courses.result import UserTaskSession
 import uuid
 
 
@@ -33,6 +32,7 @@ class TaskItem(BaseModel):
 
     task_id: Mapped[uuid.UUID] = mapped_column(ForeignKey('courses_task.id'), nullable=False)
     link: Mapped[str] = mapped_column(String(255), nullable=False)
+    video: Mapped[str] = mapped_column(String(255), nullable=False)
     type: Mapped[str] = mapped_column(SQLAlchemyEnum(ItemType), nullable=False)
 
     task: Mapped['Task'] = relationship('Task', back_populates='items')

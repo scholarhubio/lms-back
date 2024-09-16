@@ -1,4 +1,4 @@
-from models import User
+from models.users.models import User
 from strategies.student import StudentQueryStrategy
 from dal.postgres import PostgresDAL
 from repositories.student import StudentRepository

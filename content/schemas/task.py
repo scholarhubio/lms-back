@@ -13,12 +13,19 @@ class AnswerSchema(BaseSchema):
     text: str
     user_answer: UserAnswerSchema | None
 
+
+class TaskItem(BaseSchema):
+    link: str | None
+    type: str
+
+
 class TaskSchema(BaseSchema):
     title: str
     complition: str | None = None
     stars: int | None = None
     type: str | None = None
     order: int | None = None
+    items: list[TaskItem] | None = None
 
 
 class TaskWithAnswersSchema(TaskSchema):

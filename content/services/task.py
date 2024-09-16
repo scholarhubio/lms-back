@@ -6,8 +6,9 @@ from db.postgres import get_async_session
 from repositories import IRoleRepository
 from dal.postgres import get_postgres_dal, IDAL
 from factories import get_role_repo_factory, IRoleRepositoryFactory
-from models.users import User
-from models.courses.tasks import Task, UserTaskSession
+from models.users.models import User
+from models.courses.tasks import Task
+from models.courses.result import UserTaskSession
 from services.auth import get_current_user
 from uuid import UUID
 from exceptions import TaskAnswered
@@ -41,10 +42,12 @@ class TaskService(ITaskService):
     async def get_tasks(self, unit_id: UUID) -> list[Task]:
         await self.repository.get_or_create_user_unit_session(unit_id, self.user.id)
         tasks = await self.repository.get_tasks(unit_id=unit_id)
-        return await self.add_status(tasks)
+        return tasks
 
     async def get_task(self, task_id: UUID) -> Task:
-        return await self.repository.get_task(task_id=task_id, user_id=self.user.id)
+        await self.create_user_task_session(task_id)
+        result = await self.repository.get_task(task_id=task_id, user_id=self.user.id)
+        return result
 
     async def create_user_task_session(self, task_id: UUID) -> UserTaskSession:
         is_created, result = await self.repository.get_or_create_user_task_session(task_id, self.user.id)

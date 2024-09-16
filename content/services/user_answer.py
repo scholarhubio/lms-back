@@ -6,7 +6,7 @@ from db.postgres import get_async_session
 from repositories import IRoleRepository
 from dal.postgres import get_postgres_dal, IDAL
 from factories import get_role_repo_factory, IRoleRepositoryFactory
-from models.users import User
+from models.users.models import User
 from services.auth import get_current_user
 from uuid import UUID
 from schemas.responses.user_answer import AnswerResponse

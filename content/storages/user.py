@@ -1,6 +1,6 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
-from models import User
+from models.users.models import User
 from interfaces.storage import IUserStorage
 from exceptions import IntegrityError
 

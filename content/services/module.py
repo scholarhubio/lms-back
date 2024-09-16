@@ -6,8 +6,9 @@ from db.postgres import get_async_session
 from repositories import IRoleRepository
 from dal.postgres import get_postgres_dal, IDAL
 from factories import get_role_repo_factory, IRoleRepositoryFactory
-from models.users import User
-from models.courses.moduls import Module, UserModuleSession
+from models.users.models import User
+from models.courses.moduls import Module
+from models.courses.result import UserModuleSession
 from services.auth import get_current_user
 from uuid import UUID
 
@@ -31,7 +32,7 @@ class ModuleService(IModuleService):
 
     async def get_modules(self, course_id: UUID):
         modules = await self.repository.get_modules(course_id=course_id, user_id=self.user.id)
-        return await self.add_status(modules=modules)
+        return modules
             
     async def add_status(self, modules: list[Module]):
         datum = []

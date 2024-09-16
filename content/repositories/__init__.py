@@ -1,8 +1,9 @@
 from abc import ABC, abstractmethod
-from models import Course, User, UserAnswer
-from models.courses.moduls import Module, Unit, UserModuleSession
-from models.courses.tasks import UserTaskSession
-from models.courses.result import UserUnitSession
+from models.courses.course import Course
+from models.users.models import User
+from models.courses.result import UserAnswer
+from models.courses.moduls import Module, Unit
+from models.courses.result import UserUnitSession, UserTaskSession, UserModuleSession
 from dal.postgres import IDAL
 from uuid import UUID
 
