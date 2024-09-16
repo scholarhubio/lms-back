@@ -30,3 +30,11 @@ class TaskSchema(BaseSchema):
 
 class TaskWithAnswersSchema(TaskSchema):
     answers: list[AnswerSchema]
+
+
+class PureTaskSchema(BaseSchema):
+    title: str
+    text: str
+    order: int
+    unit_id: UUID
+    type: str

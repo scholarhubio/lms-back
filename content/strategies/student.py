@@ -20,13 +20,15 @@ class StudentQueryStrategy(IQueryStrategy):
     async def get_courses(self, user: User) -> list[Course]:
         return select(Course).join_from(
             Subscription, CourseModule,
-            Subscription.course_module_id==CourseModule.id
-            ).where(
+            Subscription.course_module_id == CourseModule.id
+            ).order_by(
+                CourseModule.course_id,
+                desc(CourseModule.order)).distinct(CourseModule.course_id).where(
                 Subscription.is_active == True,
                 Subscription.user_id == user.id,
                 Subscription.start_date <= date.today(),
                 Subscription.end_date >= date.today(),
-                ).order_by(desc(CourseModule.order))
+                )
 
     async def get_modules(self, course_id: UUID, user_id: UUID) -> list[Course]:
         query = (
