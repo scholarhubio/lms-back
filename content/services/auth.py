@@ -151,7 +151,9 @@ class AuthenticationService:
         await self.cache.setex(jti, seconds=expiration_time, value="true")
         return {"msg": "Successfully logged out"}
 
-    async def refresh_access_token(self):
+    async def refresh_access_token(
+            self,
+            credentials: HTTPAuthorizationCredentials,):
         """Refresh the access token using the refresh token."""
         await self.Authorize.jwt_refresh_token_required()
         subject = await self.Authorize.get_jwt_subject()
@@ -185,6 +187,7 @@ class AuthenticationService:
             "phone": phone,
             "text": text
         }
+
 
 
 async def get_authentication_service(

@@ -46,3 +46,11 @@ async def send_code(
     service: IAuthenticationService = Depends(get_authentication_service),
     ):
     return await service.verify_code(data)
+
+
+@router.post("/refresh", status_code=status.HTTP_200_OK)
+async def refresh_token(
+    refresh_token: Annotated[str, Form()],
+    service: IAuthenticationService = Depends(get_authentication_service),
+    ):
+    return await service.refresh_access_token()
